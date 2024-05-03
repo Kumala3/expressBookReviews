@@ -29,14 +29,30 @@ public_users.get("/isbn/:isbn", function (req, res) {
 
 // Get book details based on author
 public_users.get("/author/:author", function (req, res) {
-    // Write your code here
-    return res.status(300).json({ message: "Yet to be implemented" });
+    const author = req.params.author.toLowerCase();
+
+    const book = Object.values(books).find((book) => book.author.toLowerCase() === author);
+
+    if (!book) {
+        return res.status(404).json({ message: "Book not found" });
+    } else {
+        return res.status(200).json(book);
+    }
 });
 
 // Get all books based on title
 public_users.get("/title/:title", function (req, res) {
-    // Write your code here
-    return res.status(300).json({ message: "Yet to be implemented" });
+    const title = req.params.title.toLowerCase();
+
+    const book = Object.values(books).find(
+        book => book.title.toLowerCase() === title
+    );
+
+    if (!book) {
+        return res.status(404).json({ message: "Book not found" });
+    } else {
+        return res.status(200).json(book);
+    }
 });
 
 //  Get book review
