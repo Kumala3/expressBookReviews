@@ -39,7 +39,7 @@ reg_users.post("/login", (req, res) => {
             }
         );
 
-        req.session.authorization = { accessToken };
+        req.session.authorization = { accessToken: accessToken };
 
         return res
             .status(200)
@@ -69,7 +69,7 @@ function verifyToken(req, res, next) {
 }
 
 // Add a book review
-reg_users.put("/auth/review/:isbn", verifyToken, (req, res) => {
+reg_users.put("/review/:isbn", verifyToken, (req, res) => {
     const review = req.query.review;
     const isbn = req.params.isbn;
 
