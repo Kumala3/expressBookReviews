@@ -32,7 +32,7 @@ reg_users.post("/login", (req, res) => {
 
     if (authenticatedUser(username, password)) {
         const accessToken = jwt.sign(
-            { data: password },
+            { username: username },
             process.env.SECRET_JW_TOKEN,
             {
                 expiresIn: "24h",
@@ -70,20 +70,24 @@ function verifyToken(req, res, next) {
 
 // Add a book review
 reg_users.put("/review/:isbn", verifyToken, (req, res) => {
-    const review = req.query.review;
+    const review = req.body.review;
     const isbn = req.params.isbn;
+    const username = req.user.username;
 
     if (!books[isbn]) {
         return res.status(404).json({ message: "Book not found" });
     }
 
     try {
-        books[isbn].review = review;
-        return res.status(200).json({ message: "Review added" });
+        books[isbn].reviews[username] = review;
+        return res.status(200).json({ message: "Review has been added" });
     } catch (err) {
         return res.status(400).json({ message: "Invalid request" });
     }
 });
+
+// Delete a book review
+reg_users.delete("/auth/review/:isbn", (req, res) => {});
 
 module.exports.authenticated = reg_users;
 module.exports.isValid = isValid;
