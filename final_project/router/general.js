@@ -5,8 +5,33 @@ let users = require("./auth_users.js").users;
 
 const public_users = express.Router();
 
+const doesExist = username => {
+    let users_with_same_name = users.filter(user => {
+        return user.username === username;
+    });
+    if (users_with_same_name.length > 0) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
 public_users.post("/register", (req, res) => {
-    return res.status(300).json({ message: "Yet to be implemented" });
+    const username = req.body.username;
+    const password = req.body.password;
+
+    if (!username || !password) {
+        return res
+            .status(400)
+            .json({ message: "Username and password are required" });
+    }
+
+    if (!doesExist(username)) {
+        users.push({ username: username, password: password });
+        return res.status(201).json({ message: `User ${username} created` });
+    } else {
+        return res.status(400).json({ message: `User ${username} already exist` });
+    }
 });
 
 // Get the book list available in the shop
@@ -30,7 +55,9 @@ public_users.get("/isbn/:isbn", function (req, res) {
 public_users.get("/author/:author", function (req, res) {
     const author = req.params.author.toLowerCase();
 
-    const book = Object.values(books).find((book) => book.author.toLowerCase() === author);
+    const book = Object.values(books).find(
+        book => book.author.toLowerCase() === author
+    );
 
     if (!book) {
         return res.status(404).json({ message: "Book not found" });
