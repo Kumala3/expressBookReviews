@@ -1,15 +1,14 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const session = require("express-session");
 const customer_routes = require("./router/auth_users.js").authenticated;
 const genl_routes = require("./router/general.js").general;
+const { verifyToken } = require("./middlewares/auth.js");
 
 const app = express();
 
 app.use(express.json());
 
 app.use(
-    "/customer",
     session({
         secret: "fingerprint_customer",
         resave: true,
@@ -17,22 +16,7 @@ app.use(
     })
 );
 
-app.use("/customer/auth/*", function auth(req, res, next) {
-    if (req.session.authorization) {
-        token = req.session.authorization["accessToken"];
-
-        jwt.verify(token, "access", (err, user) => {
-            if (!err) {
-                req.user = user;
-                next();
-            } else {
-                return res
-                    .status(403)
-                    .json({ message: "User not authenticated" });
-            }
-        });
-    }
-});
+app.use("/customer/*", verifyToken);
 
 const PORT = 5000;
 

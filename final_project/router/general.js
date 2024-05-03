@@ -1,4 +1,5 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
@@ -7,6 +8,13 @@ const public_users = express.Router();
 
 const doesExist = username => {
     return users.some(user => user.username === username);
+};
+
+const authenticatedUser = (username, password) => {
+    const user = users.find(
+        user => user.username === username && user.password === password
+    );
+    return user != null;
 };
 
 public_users.post("/register", (req, res) => {
@@ -26,6 +34,35 @@ public_users.post("/register", (req, res) => {
         return res
             .status(400)
             .json({ message: `User ${username} already exist` });
+    }
+});
+
+public_users.post("/login", (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+
+    if (!username || !password) {
+        return res
+            .status(400)
+            .json({ message: "Username or password is incorrect" });
+    }
+
+    if (authenticatedUser(username, password)) {
+        const accessToken = jwt.sign(
+            { username: username },
+            process.env.SECRET_JW_TOKEN,
+            {
+                expiresIn: "24h",
+            }
+        );
+
+        req.session.authorization = { accessToken: accessToken };
+
+        return res
+            .status(200)
+            .json({ message: "User successfully logged in!" });
+    } else {
+        return res.status(403).json({ message: "User not authenticated" });
     }
 });
 
