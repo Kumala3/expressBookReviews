@@ -6,14 +6,7 @@ let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
 const doesExist = username => {
-    let users_with_same_name = users.filter(user => {
-        return user.username === username;
-    });
-    if (users_with_same_name.length > 0) {
-        return true;
-    } else {
-        return false;
-    }
+    return users.some(user => user.username === username);
 };
 
 public_users.post("/register", (req, res) => {
@@ -30,7 +23,9 @@ public_users.post("/register", (req, res) => {
         users.push({ username: username, password: password });
         return res.status(201).json({ message: `User ${username} created` });
     } else {
-        return res.status(400).json({ message: `User ${username} already exist` });
+        return res
+            .status(400)
+            .json({ message: `User ${username} already exist` });
     }
 });
 
